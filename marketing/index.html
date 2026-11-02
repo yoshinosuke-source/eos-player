@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EOS Player — 好きな曲で、英語が口から出てくる</title>
+  <meta name="description" content="EOS Playerは、手持ちのMP3と歌詞で英語を学ぶブラウザアプリ。1フレーズ固定ループ、0.8倍速、英日切替、タップだけの歌詞同期。インストール不要、音源は端末の中だけに保存。">
+  <meta property="og:title" content="EOS Player — 好きな曲で、英語が口から出てくる">
+  <meta property="og:description" content="1フレーズ固定ループ × 速度調整 × 英日切替。タップだけで歌詞同期できる、歌で学ぶ英語プレイヤー。">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#000000">
+  <style>
+    :root {
+      --bg: #000000;
+      --bg-2: #0b0b0d;
+      --card: #1c1c1e;
+      --card-active: #2c2c2e;
+      --line: #2c2c2e;
+      --accent: #0a84ff;
+      --text: #ffffff;
+      --sub: #8e8e93;
+      --soft: #d1d1d6;
+      --success: #30d158;
+      --warning: #ff9f0a;
+      --radius: 18px;
+      --maxw: 1080px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+      line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 16px; }
+
+    /* Nav */
+    nav { position: sticky; top: 0; z-index: 10; background: rgba(0,0,0,0.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid #141416; }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .logo { font-weight: 800; letter-spacing: 0.5px; font-size: 17px; }
+    .logo span { color: var(--accent); }
+    .nav-cta { background: var(--text); color: #000; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 999px; }
+
+    /* Hero */
+    .hero { padding: 72px 0 56px; position: relative; overflow: hidden; }
+    .hero::before {
+      content: ""; position: absolute; inset: -20% -10% auto; height: 520px; pointer-events: none;
+      background: radial-gradient(closest-side, rgba(10,132,255,0.28), transparent 70%);
+    }
+    .hero .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; position: relative; }
+    .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; color: var(--warning); border: 1px solid rgba(255,159,10,0.4); padding: 4px 12px; border-radius: 999px; margin-bottom: 20px; }
+    h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.15; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 20px; }
+    h1 em { white-space: nowrap; font-style: normal; background: linear-gradient(90deg, var(--accent), #64d2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { font-size: 17px; color: var(--soft); max-width: 34em; margin-bottom: 32px; }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 26px; border-radius: 14px; font-weight: 700; font-size: 15px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #0071e3; }
+    .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--line); }
+    .micro { margin-top: 16px; font-size: 12px; color: var(--sub); }
+
+    /* Phone mock */
+    .phone { width: 300px; max-width: 100%; margin: 0 auto; background: #000; border: 10px solid #1c1c1e; border-radius: 44px; padding: 18px 12px 16px; box-shadow: 0 40px 80px rgba(10,132,255,0.15), 0 0 0 1px #2c2c2e; }
+    .ph-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; font-weight: 700; }
+    .ph-tabs { display: flex; background: #2c2c2e; border-radius: 6px; padding: 2px; font-size: 9px; }
+    .ph-tabs span { padding: 3px 7px; border-radius: 4px; color: var(--sub); }
+    .ph-tabs span.on { background: #3a3a3c; color: #fff; }
+    .ph-deck { background: var(--card); border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 8px; }
+    .ph-title { font-size: 11px; font-weight: 600; }
+    .ph-time { font-size: 9px; color: var(--sub); margin: 2px 0 6px; }
+    .ph-bar { height: 3px; background: #2c2c2e; border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+    .ph-bar i { display: block; height: 100%; width: 0; background: var(--accent); animation: prog 8s linear infinite; }
+    @keyframes prog { to { width: 100%; } }
+    .ph-ctrl { display: flex; justify-content: center; align-items: center; gap: 10px; }
+    .ph-pill { font-size: 8px; padding: 3px 7px; border-radius: 8px; background: #2c2c2e; color: var(--sub); }
+    .ph-pill.on { background: var(--warning); color: #000; font-weight: 700; }
+    .ph-play { width: 28px; height: 28px; border-radius: 50%; background: #fff; color: #000; font-size: 10px; display: grid; place-items: center; font-weight: 700; }
+    .ph-card { background: var(--card); border-radius: 9px; padding: 8px 9px; margin-bottom: 6px; border: 1px solid transparent; }
+    .ph-card.active { border-color: var(--warning); background: var(--card-active); }
+    .ph-sec { font-size: 7px; color: var(--warning); font-weight: 800; letter-spacing: 0.5px; }
+    .ph-en { font-size: 10.5px; font-weight: 600; line-height: 1.3; }
+    .ph-ja { font-size: 8.5px; color: var(--sub); }
+    .ph-dock { display: flex; gap: 5px; margin-top: 8px; }
+    .ph-dock span { flex: 1; text-align: center; font-size: 8px; font-weight: 700; padding: 6px 0; border-radius: 6px; }
+    .ph-dock .r { background: #2c2c2e; color: var(--warning); }
+    .ph-dock .g { background: var(--success); color: #000; }
+
+    /* Sections */
+    section { padding: 72px 0; }
+    .sec-label { font-size: 12px; font-weight: 800; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+    h2 { font-size: clamp(26px, 4vw, 38px); line-height: 1.25; font-weight: 800; margin-bottom: 16px; }
+    .sec-lead { color: var(--soft); max-width: 40em; margin-bottom: 40px; }
+
+    /* Problem */
+    .problem { background: var(--bg-2); border-top: 1px solid #141416; border-bottom: 1px solid #141416; }
+    .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .pain { background: var(--card); border-radius: var(--radius); padding: 22px; }
+    .pain b { display: block; font-size: 16px; margin-bottom: 6px; }
+    .pain p { font-size: 14px; color: var(--sub); }
+    .answer { margin-top: 28px; font-size: 18px; font-weight: 700; }
+    .answer span { color: var(--success); }
+
+    /* Features */
+    .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feat { background: var(--card); border-radius: var(--radius); padding: 24px; border: 1px solid #232325; }
+    .feat .ico { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; font-size: 18px; margin-bottom: 14px; font-weight: 800; }
+    .feat h3 { font-size: 17px; margin-bottom: 6px; }
+    .feat p { font-size: 14px; color: var(--sub); }
+    .i-blue { background: rgba(10,132,255,0.16); color: var(--accent); }
+    .i-orange { background: rgba(255,159,10,0.16); color: var(--warning); }
+    .i-green { background: rgba(48,209,88,0.16); color: var(--success); }
+
+    /* Steps */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: s; }
+    .step { position: relative; background: linear-gradient(180deg, #151517, #0d0d0f); border: 1px solid #232325; border-radius: var(--radius); padding: 26px 22px 22px; }
+    .step::before { counter-increment: s; content: "0" counter(s); font-size: 34px; font-weight: 800; color: #2c2c2e; display: block; margin-bottom: 8px; line-height: 1; }
+    .step h3 { font-size: 17px; margin-bottom: 6px; }
+    .step p { font-size: 14px; color: var(--sub); }
+    .tap-demo { margin-top: 14px; background: var(--warning); color: #000; font-weight: 800; font-size: 13px; text-align: center; border-radius: 10px; padding: 10px; animation: tap 1.6s ease-in-out infinite; }
+    @keyframes tap { 0%, 70%, 100% { transform: scale(1); } 78% { transform: scale(0.95); opacity: 0.8; } }
+
+    /* Loop explainer */
+    .loop-box { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; background: var(--card); border-radius: 24px; padding: 36px; }
+    .loop-vis { background: #000; border-radius: 16px; padding: 22px; }
+    .loop-line { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .loop-meta { font-size: 12px; color: var(--sub); margin-bottom: 16px; }
+    .loop-track { height: 6px; border-radius: 3px; background: #2c2c2e; position: relative; overflow: hidden; }
+    .loop-track i { position: absolute; left: 30%; width: 0; top: 0; bottom: 0; background: var(--warning); animation: loop 2.2s linear infinite; }
+    @keyframes loop { from { width: 0; } to { width: 34%; } }
+    .loop-rates { display: flex; gap: 8px; margin-top: 18px; }
+    .loop-rates span { font-size: 12px; padding: 5px 12px; border-radius: 10px; background: #1c1c1e; color: var(--sub); border: 1px solid #2c2c2e; }
+    .loop-rates span.on { border-color: var(--accent); color: var(--accent); }
+    .check { list-style: none; }
+    .check li { padding-left: 26px; position: relative; margin-bottom: 12px; color: var(--soft); font-size: 15px; }
+    .check li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: 800; }
+
+    /* Who */
+    .who-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .who { background: var(--card); border-radius: var(--radius); padding: 22px 24px; display: flex; gap: 16px; align-items: flex-start; }
+    .who .tag { flex: none; font-size: 11px; font-weight: 800; color: #000; background: var(--text); border-radius: 8px; padding: 4px 8px; margin-top: 2px; }
+    .who p { font-size: 14px; color: var(--sub); }
+    .who b { color: var(--text); display: block; font-size: 15px; margin-bottom: 2px; }
+
+    /* FAQ */
+    details { background: var(--card); border-radius: 14px; padding: 18px 20px; margin-bottom: 10px; }
+    summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--accent); font-weight: 800; }
+    details[open] summary::after { content: "−"; }
+    details p { margin-top: 10px; color: var(--sub); font-size: 14px; }
+
+    /* Final CTA */
+    .final { text-align: center; padding: 96px 0; background: radial-gradient(closest-side at 50% 60%, rgba(10,132,255,0.22), transparent 75%); }
+    .final h2 { margin-bottom: 12px; }
+    .final p { color: var(--soft); margin-bottom: 30px; }
+    .final .cta-row { justify-content: center; }
+
+    footer { border-top: 1px solid #141416; padding: 28px 0; font-size: 12px; color: var(--sub); }
+    footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .hero { padding-top: 48px; }
+      .hero .wrap, .loop-box { grid-template-columns: 1fr; }
+      .pain-grid, .feat-grid, .steps { grid-template-columns: 1fr; }
+      .who-grid { grid-template-columns: 1fr; }
+      .loop-box { padding: 22px; }
+      section { padding: 56px 0; }
+    }
+    @media (max-width: 420px) {
+      .btn { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="wrap">
+      <div class="logo">EOS<span>.</span> Player</div>
+      <a class="nav-cta" href="../index.html">今すぐ使う</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow">歌で覚える英語プレイヤー</div>
+        <h1>好きな曲で、<br>英語が<br><em>口から出てくる。</em></h1>
+        <p class="lead">
+          手持ちのMP3と歌詞を入れるだけ。聴き取れない1フレーズを固定ループし、0.8倍速で口に馴染ませ、「覚えた」まで繰り返す。
+          EOS Playerは、聴き流しを“身につく練習”に変えるブラウザアプリです。
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="../index.html">無料でブラウザから使う →</a>
+          <a class="btn btn-ghost" href="#how">使い方を見る</a>
+        </div>
+        <p class="micro">インストール不要・登録不要 ／ 音源はあなたの端末の中だけに保存</p>
+      </div>
+
+      <div class="phone" aria-hidden="true">
+        <div class="ph-head">EOS 1.0 <div class="ph-tabs"><span class="on">プレイヤー</span><span>Sync Studio</span></div></div>
+        <div class="ph-deck">
+          <div class="ph-title">Track 01: Call Me Yosshii!</div>
+          <div class="ph-time">0:13 / 3:24</div>
+          <div class="ph-bar"><i></i></div>
+          <div class="ph-ctrl"><span class="ph-pill on">フレーズ固定: ON</span><span class="ph-play">❚❚</span><span class="ph-pill">0.8x</span></div>
+        </div>
+        <div class="ph-card"><div class="ph-sec">[VERSE 1]</div><div class="ph-en">Alarm rings out at five AM</div><div class="ph-ja">午前5時にアラームが鳴り響く</div></div>
+        <div class="ph-card"><div class="ph-en">Soy latte warm inside my hand</div><div class="ph-ja">温かいソイラテを手にして</div></div>
+        <div class="ph-card active"><div class="ph-sec">[CHORUS]</div><div class="ph-en">Hey, call me Yosshii, hear the beat!</div><div class="ph-ja">ビートを感じて、よっしーと呼んでくれ！</div></div>
+        <div class="ph-dock"><span class="r">↻ もう一回</span><span class="g">✓ 覚えた</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PROBLEM -->
+  <section class="problem">
+    <div class="wrap">
+      <div class="sec-label">Why</div>
+      <h2>洋楽で英語、なぜ続かない？</h2>
+      <p class="sec-lead">「好きな曲で英語を」は最高の動機。でも普通の音楽アプリは“聴く”ためのもので、“覚える”ためには作られていません。</p>
+      <div class="pain-grid">
+        <div class="pain"><b>一瞬で流れていく</b><p>聴き取れなかった1行に戻るたび、シークバーと格闘して気持ちが切れる。</p></div>
+        <div class="pain"><b>歌詞と音がバラバラ</b><p>歌詞サイトとプレイヤーを行き来して、今どこを歌っているか見失う。</p></div>
+        <div class="pain"><b>覚えたか分からない</b><p>何度聴いても「なんとなく知ってる」止まり。どこが苦手かが残らない。</p></div>
+      </div>
+      <p class="answer">EOS Playerは、その3つを<span>1画面</span>で解決します。</p>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-label">Features</div>
+      <h2>“聴く”から“使える”までの機能だけ。</h2>
+      <p class="sec-lead">余計なものはありません。1フレーズを確実に自分のものにするための道具がそろっています。</p>
+      <div class="feat-grid">
+        <div class="feat"><div class="ico i-orange">∞</div><h3>フレーズ固定ループ</h3><p>苦手な1行をタップしてON。その行だけを、わずかな余白付きで自動で繰り返します。</p></div>
+        <div class="feat"><div class="ico i-blue">×</div><h3>0.8 / 1.0 / 1.2倍速</h3><p>速すぎるならゆっくり、慣れたら原速より速く。ワンタップで切り替え。</p></div>
+        <div class="feat"><div class="ico i-blue">英</div><h3>英／日／英＋日 切替</h3><p>和訳を隠して聴き取りテスト、英語を隠して瞬間英作文。同じ歌詞で練習の形を変えられます。</p></div>
+        <div class="feat"><div class="ico i-orange">▼</div><h3>構文ポイント解説</h3><p>「call me + 名前（SVOC）」「Thirty-minute が単数の理由」など、歌詞の文法を各行で確認。</p></div>
+        <div class="feat"><div class="ico i-green">✓</div><h3>覚えた／もう一回</h3><p>行ごとに「定着」「復習」を記録。どこが身についていないかが一目でわかります。</p></div>
+        <div class="feat"><div class="ico i-green">⌁</div><h3>Sync Studio</h3><p>歌詞を貼って、曲に合わせてタップするだけ。あなたの曲が、その場で学習教材になります。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOOP EXPLAINER -->
+  <section>
+    <div class="wrap">
+      <div class="loop-box">
+        <div>
+          <div class="sec-label">Core</div>
+          <h2>1行を、口が覚えるまで。</h2>
+          <ul class="check">
+            <li>聴き取れない行をタップ → その位置から再生</li>
+            <li>「フレーズ固定」ONで、その行だけを自動リピート</li>
+            <li>0.8倍速でリズムをつかみ、1.0倍速で一緒に歌う</li>
+            <li>言えるようになったら「✓ 覚えた」</li>
+          </ul>
+        </div>
+        <div class="loop-vis" aria-hidden="true">
+          <div class="loop-line">Thirty-minute run, starting up again</div>
+          <div class="loop-meta">00:04.5 → 00:08.8 をループ中</div>
+          <div class="loop-track"><i></i></div>
+          <div class="loop-rates"><span class="on">0.8x</span><span>1.0x</span><span>1.2x</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW -->
+  <section id="how" class="problem">
+    <div class="wrap">
+      <div class="sec-label">How it works</div>
+      <h2>3ステップで、あなたの曲が教材に。</h2>
+      <p class="sec-lead">専用データは不要。持っている曲と歌詞があれば、数分で準備完了です。</p>
+      <div class="steps">
+        <div class="step"><h3>MP3を選ぶ</h3><p>端末の音源を選択。一度選べばブラウザ内に保存され、次回から自動で読み込まれます。</p></div>
+        <div class="step"><h3>歌詞を貼り付けてタップ</h3><p>Sync Studioに歌詞を貼り、曲を流しながら各行の歌い出しでタップ。タイミングは自動で少し補正されます。</p><div class="tap-demo">【次の行をマーク】</div></div>
+        <div class="step"><h3>ループして、覚える</h3><p>プレイヤーに戻れば、歌詞が曲に合わせて自動で光ります。あとは苦手な行を固定して練習するだけ。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO -->
+  <section>
+    <div class="wrap">
+      <div class="sec-label">For you</div>
+      <h2>こんな人のために作りました。</h2>
+      <div class="who-grid" style="margin-top:28px">
+        <div class="who"><span class="tag">通勤</span><div><b>スキマ時間で英語に触れたい社会人</b><p>電車の中でも、1行ずつ確実に。スマホ1台で完結します。</p></div></div>
+        <div class="who"><span class="tag">歌う</span><div><b>洋楽をちゃんと歌えるようになりたい人</b><p>カラオケで口ごもるあの1行を、0.8倍速ループで攻略。</p></div></div>
+        <div class="who"><span class="tag">発音</span><div><b>リスニング・発音を伸ばしたい学習者</b><p>英語のみ表示で聴き取り、日本語のみ表示で英作文。</p></div></div>
+        <div class="who"><span class="tag">教える</span><div><b>歌を教材にしたい先生・コーチ</b><p>好きな曲をSync Studioで同期して、そのまま授業用プレイヤーに。</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="problem">
+    <div class="wrap" style="max-width:760px">
+      <div class="sec-label">FAQ</div>
+      <h2>よくある質問</h2>
+      <div style="margin-top:28px">
+        <details><summary>アプリのインストールは必要？</summary><p>不要です。スマホやPCのブラウザでページを開くだけで使えます。</p></details>
+        <details><summary>音源はどこかにアップロードされますか？</summary><p>いいえ。選んだMP3はお使いのブラウザ内（IndexedDB）にのみ保存され、外部サーバーへは送信されません。</p></details>
+        <details><summary>どんな曲でも使えますか？</summary><p>端末にある音声ファイルと、その歌詞テキストがあれば使えます。音源・歌詞はご自身が利用する権利を持つものをお使いください。</p></details>
+        <details><summary>タップ同期がずれたら？</summary><p>タップ時に約0.15秒の自動補正がかかります。それでもずれる場合は、Sync Studioでもう一度タップし直してください。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <div class="wrap">
+      <h2>今日の1曲から、始めよう。</h2>
+      <p>お気に入りの曲を1つ選んで、まずは1行だけ。</p>
+      <div class="cta-row"><a class="btn btn-primary" href="../index.html">EOS Playerを開く →</a></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap"><span>© EOS Player</span><span>Player &amp; Sync Studio — 歌で学ぶ英語</span></div>
+  </footer>
+
+</body>
+</html>
